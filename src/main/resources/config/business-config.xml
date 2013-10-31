@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    spring-petclinic 소스를 참조함
+
+    Repository and Service layers
+-->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring.xsd">
+
+  <!--
+  xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+  http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring.xsd
+  -->
+
+  <!-- ========================= RESOURCE DEFINITIONS ========================= -->
+
+  <!-- import the dataSource definition -->
+  <import resource="datasource-config.xml"/>
+
+  <!-- enables scanning for @Transactional annotations -->
+  <tx:annotation-driven />
+
+  <!-- com.mailplants.service 하위 패키지들 검색 -->
+  <context:component-scan base-package="com.springapp.mvc.service"/>
+
+  <!-- Configurer that replaces ${...} placeholders with values from a properties file -->
+  <!-- (in this case, JDBC-related settings for the JPA EntityManager definition below) -->
+  <!--
+  <context:property-placeholder location="classpath:spring/data-access.properties" system-properties-mode="OVERRIDE"/>
+  -->
+
+  <!-- ==================		 4 Profiles to choose from 			===================
+                  - jdbc (uses Spring" JdbcTemplate)
+                  - mybatis
+                  - default (uses JPA)
+                  - spring-data-jpa
+      =============================================================================-->
+
+  <!-- spring jdbc -->
+  <beans profile="jdbc">
+    <!-- Transaction manager for a single JDBC DataSource (alternative to JTA) -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+          p:dataSource-ref="dataSource"/>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+      <constructor-arg ref="dataSource"/>
+    </bean>
+
+    <bean id="namedParameterJdbcTemplate"
+          class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+      <constructor-arg ref="dataSource"/>
+    </bean>
+
+    <context:component-scan base-package="com.springapp.mvc.repository.jdbc"/>
+  </beans>
+
+
+
+  <!-- mybatis 연동 -->
+  <beans profile="mybatis">
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+          p:dataSource-ref="dataSource"/>
+
+    <!-- =========== SqlSessionFactory =========== -->
+    <bean id="mailPlantsMysqlDbSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"
+          p:dataSource-ref="dataSource"
+          p:typeAliasesPackage="com.springapp.mvc.domain"
+          p:configLocation="classpath:config/mybatis-config.xml"
+        />
+    <!-- 이부분 일단 빼줌 p:configLocation="classpath:mybatis-config.xml" -->
+
+    <!-- =========== MapperScanner =========== -->
+    <!-- scan for mappers and let them be autowired -->
+
+    <mybatis:scan base-package="com.springapp.mvc.mapper" />
+
+
+    <!--
+    <bean id="mailPlantsMysqlDbMapperScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+      <property name="basePackage" value="com.mailplants.webapp.persistence" />
+      <property name="sqlSessionFactoryBeanName" value="mailPlantsMysqlDbSqlSessionFactory" />
+    </bean>
+    -->
+
+  </beans>
+
+
+  <!-- spring data jpa, jpa 사용시 -->
+  <beans profile="jpa, spring-data-jpa">
+
+    <!-- JPA EntityManagerFactory -->
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          p:dataSource-ref="dataSource">
+      <property name="jpaVendorAdapter">
+        <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
+              p:database="MYSQL" p:showSql="true"/>
+      </property>
+
+
+      <!-- gDickens: BOTH Persistence Unit and Packages to Scan are NOT compatible, persistenceUnit will win -->
+
+      <property name="persistenceUnitName" value="mailPlantsMysqlPersistence"/>
+      <property name="packagesToScan" value="com.springapp.mvc.domain"/>
+    </bean>
+
+    <!-- Transaction manager for a single JPA EntityManagerFactory (alternative to JTA) -->
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
+          p:entityManagerFactory-ref="entityManagerFactory"/>
+
+    <!--
+        Post-processor to perform exception translation on @Repository classes (from native
+        exceptions such as JPA PersistenceExceptions to Spring's DataAccessException hierarchy).
+    -->
+
+    <bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
+  </beans>
+
+
+
+
+  <!-- jpa 사용시 -->
+
+  <beans profile="jpa">
+    <!--
+        Loads JPA beans
+        Will automatically be transactional due to @Transactional.
+        EntityManager will be auto-injected due to @PersistenceContext.
+        PersistenceExceptions will be auto-translated due to @Repository.
+    -->
+    <context:component-scan base-package="com.springapp.mvc.repository.jpa"/>
+  </beans>
+
+  <!-- spring data jpa 사용시 -->
+
+  <beans profile="spring-data-jpa">
+    <jpa:repositories base-package="com.mailplants.repository.springdatajpa"/>
+  </beans>
+
+</beans>

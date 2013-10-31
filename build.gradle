@@ -1,0 +1,189 @@
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'war'
+apply plugin: 'tomcat'
+apply plugin: 'eclipse'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'idea'
+
+// dependency 버전 정보
+def version = [
+    spring: '3.2.4.RELEASE'
+    , springDataJpa: '1.3.4.RELEASE'
+    , jstl: '1.2'
+    , mybatis: '3.2.3'
+    , mybatisSpring: '1.2.1'
+    , hibernate: '4.2.4.Final'
+    , hibernateJapApi: '2.0-cr-1'
+    , hibernateValidator: '4.3.1.Final'
+    , slf4j: '1.7.5'
+    , logBack: '1.0.13'
+    , junit: '4.11'
+    , hamcrest: '1.3'
+    , groovy: '2.1.7'
+    , apacheCommonLang: '2.6'
+    , hsqldb: '2.3.0'
+    , tomcatJdbc: '7.0.42'
+    , mysqlConnector: '5.1.22'
+]
+
+def springframeworks = [
+    "org.springframework:spring-core:${version.spring}"
+    , "org.springframework:spring-context:${version.spring}"
+    , "org.springframework:spring-aop:${version.spring}"
+    , "org.springframework:spring-tx:${version.spring}"
+    , "org.springframework:spring-aspects:${version.spring}"
+    , "org.springframework:spring-oxm:${version.spring}"
+    , "org.springframework:spring-orm:${version.spring}"
+    , "org.springframework:spring-test:${version.spring}"
+    , "org.springframework:spring-jdbc:${version.spring}"
+    , "org.springframework:spring-web:${version.spring}"
+    , "org.springframework:spring-webmvc:${version.spring}"
+    , "org.springframework.data:spring-data-jpa:${version.springDataJpa}",
+]
+
+
+buildscript {
+  repositories {
+    mavenCentral()
+    // mavenLocal()
+  }
+
+  // 0.9.9 는 sts 에서 작동 안하여 0.9.8 버전 이용.
+  dependencies { classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:0.9.8' }
+}
+
+repositories {
+  mavenCentral()
+  mavenLocal()
+}
+
+
+
+dependencies {
+  /**
+   * SpringFramework: http://www.springsource.org/spring-framework
+   */
+  //compile springframeworks //도 가능
+  springframeworks.collect {
+    compile(it) {
+      // exclude(group: "cglib", module: "cglib")
+    }
+  }
+  
+  /**
+   * SLF4j & Logback
+   * SLF4j: http://www.slf4j.org/
+   * Logback: http://logback.qos.ch/
+   */
+  compile "org.slf4j:slf4j-api:${version.slf4j}"
+  runtime "org.slf4j:jcl-over-slf4j:${version.slf4j}"
+  runtime "org.slf4j:log4j-over-slf4j:${version.slf4j}"
+  compile "ch.qos.logback:logback-classic:${version.logBack}"
+
+
+  compile(
+
+    // groovy
+    "org.codehaus.groovy:groovy-all:${version.groovy}",
+
+    // apache common lang
+    "commons-lang:commons-lang:${version.apacheCommonLang}",
+
+    // mybatis
+    "org.mybatis:mybatis:${version.mybatis}",
+    "org.mybatis:mybatis-spring:${version.mybatisSpring}",
+
+    // hibernate
+    "org.hibernate.java-persistence:jpa-api:${version.hibernateJapApi}",
+    "org.hibernate:hibernate-entitymanager:${version.hibernate}",
+
+    // hibernate validator
+    "org.hibernate:hibernate-validator:${version.hibernateValidator}",
+
+    // javax inject
+    "javax.inject:javax.inject:1",
+
+    /**
+     * Google Guava(Collecton Utils): http://code.google.com/p/guava-libraries/
+     */
+    "com.google.guava:guava:14.0.1",
+
+    // cglib
+    "cglib:cglib:2.2.2",
+    "cglib:cglib-nodep:2.2.2"
+  )
+
+  runtime(
+
+      // mysql jdbc
+      "mysql:mysql-connector-java:${version.mysqlConnector}",
+
+      // hsqldb
+      "org.hsqldb:hsqldb:${version.hsqldb}",
+
+      // tomcat jdbc
+      "org.apache.tomcat:tomcat-jdbc:${version.tomcatJdbc}",
+
+      // jstl
+      "javax.servlet:jstl:${version.jstl}"
+  )
+
+  providedCompile(
+      // servlet api
+      "javax.servlet:javax.servlet-api:3.0.1"
+  )
+
+  // test
+  testCompile(
+      "org.springframework:spring-test:${version.spring}"
+      , "junit:junit:${version.junit}"
+      , "org.hamcrest:hamcrest-library:${version.hamcrest}"
+  )
+
+
+  def tomcatVersion = '7.0.37'
+  tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
+      "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
+  tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
+    exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
+  }
+
+  /**
+   * Logback을 사용하기 때문에 모든 의존성 라이브러리에서 common-logging는 제외
+   */
+  [configurations.runtime, configurations.default]*.exclude(module: 'commons-logging')
+  
+
+  
+
+}
+
+
+eclipse {
+  classpath {
+    downloadSources = true
+    defaultOutputDir = file("${buildDir}/classes/main")
+  }
+  wtp {
+    component {
+      contextPath = "/"
+    }
+    facet {
+      facet name: 'jst.web', version: '3.0' // Servlet Spec Version 지정
+      facet name: 'jst.java', version: '1.6' // Java Version 지정
+    }
+  }
+}
+
+tomcatRun {
+  httpPort = 8090
+  reloadable = true
+  URIEncoding = 'utf-8'
+  contextPath = '/sample-mvc'
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '1.8'
+}
+

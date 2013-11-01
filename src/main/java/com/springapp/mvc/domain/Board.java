@@ -1,5 +1,7 @@
 package com.springapp.mvc.domain;
 
+import javax.persistence.*;
+
 /**
  * Created with IntelliJ IDEA.
  * User: yoyojyv
@@ -7,10 +9,22 @@ package com.springapp.mvc.domain;
  * Time: 오전 1:23
  * To change this template use File | Settings | File Templates.
  */
+
+@Entity
+// @Table("Board")
 public class Board {
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+
+  @Column
+  // @Column(name = "subject")
   private String subject;
+
+  @Column
+  // @Column(name = "contents")
   private String contents;
 
   public Long getId() {

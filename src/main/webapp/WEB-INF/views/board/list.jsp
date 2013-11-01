@@ -26,6 +26,4 @@
   </li>
   </c:forEach>
 
-
-
 </ul>

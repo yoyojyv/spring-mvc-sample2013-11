@@ -19,4 +19,6 @@ public interface BoardService {
 
   public void save(Board board);
 
+  public void delete(Long id);
+
 }

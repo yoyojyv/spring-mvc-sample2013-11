@@ -6,7 +6,6 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="sf" uri="http://www.springframework.org/tags/form" %>
 
-
 <% // 현재의 context path %>
 <c:set var="CONTEXT_PATH" value="<%=request.getContextPath()%>" scope="request"/>
 

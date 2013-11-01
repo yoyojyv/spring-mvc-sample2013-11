@@ -1,6 +1,7 @@
 package com.springapp.mvc.mapper
 
 import com.springapp.mvc.domain.Board
+import org.apache.ibatis.annotations.Delete
 import org.apache.ibatis.annotations.Insert
 import org.apache.ibatis.annotations.Options
 import org.apache.ibatis.annotations.Param
@@ -28,14 +29,22 @@ public interface BoardMapper {
     subject = #{subject}, contents = #{contents}
   """)
   @Options(useGeneratedKeys = true, keyProperty = "id", flushCache = true)
-  void insert(Board board);
+  void insert(Board board)
 
   @Update("""
     UPDATE Board
       SET
     subject = #{subject}, contents = #{contents}
+    WHERE id = #{id}
   """)
   @Options(flushCache = true)
-  void update(Board board);
+  void update(Board board)
+
+  @Delete("""
+    DELETE FROM Board WHERE id = #{id}
+  """)
+  @Options(flushCache = true)
+  void deleteById(@Param("id") Long id)
+
 
 }

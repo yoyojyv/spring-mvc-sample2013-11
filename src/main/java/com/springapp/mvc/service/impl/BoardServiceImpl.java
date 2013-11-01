@@ -5,6 +5,8 @@ import com.springapp.mvc.mapper.BoardMapper;
 import com.springapp.mvc.service.BoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,18 +23,20 @@ public class BoardServiceImpl implements BoardService {
   @Autowired
   private BoardMapper boardMapper;
 
-
   @Override
+  @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
   public Board findById(Long id) {
     return boardMapper.findById(id);
   }
 
   @Override
+  @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
   public List<Board> findAll() {
     return boardMapper.findAll();
   }
 
   @Override
+  @Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = {Exception.class})
   public void save(Board board) {
 
     if (board.getId() != null && board.getId() > 0) {
@@ -49,5 +53,11 @@ public class BoardServiceImpl implements BoardService {
       boardMapper.insert(board);
     }
 
+  }
+
+  @Override
+  @Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = {Exception.class})
+  public void delete(Long id) {
+    boardMapper.deleteById(id);
   }
 }

@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import javax.naming.Binding;
 import javax.validation.Valid;
@@ -52,9 +49,13 @@ public class BoardController {
 
   @RequestMapping(value = "/board/save", method = RequestMethod.POST)
   public String save(@Valid Board board, BindingResult bindingResult) {
-
     boardService.save(board);
+    return "redirect:/board/list";
+  }
 
+  @RequestMapping(value = "/board/delete", method = RequestMethod.POST)
+  public String delete(@RequestParam Long id) {
+    boardService.delete(id);
     return "redirect:/board/list";
   }
 

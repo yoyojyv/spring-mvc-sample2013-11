@@ -15,3 +15,7 @@ Spring MVC Sample - 2013.11.01
 
 
 ### ● 04: 삭제기능, jquery 설정
+
+
+### ● 05: Spring Data JPA 이용
+* tomcat 을 띄울 때 -Dspring.profiles.active="dev,spring-data-jpa" 옵션을 줄 것...

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -33,9 +34,9 @@ public class BoardController {
   }
 
   @RequestMapping("/board/show/{id}")
-  public String view(@PathVariable Long id, Model model) {
+  public String show(@PathVariable Long id, Model model) {
     model.addAttribute("board", boardService.findById(id));
-    return "board/view";
+    return "board/show";
   }
 
   @RequestMapping("/board/edit/{id}")
@@ -45,12 +46,15 @@ public class BoardController {
   }
 
   @RequestMapping("/board/create")
-  public String create(Model model) {
+  public String create(@ModelAttribute Board board) {
     return "board/create";
   }
 
   @RequestMapping(value = "/board/save", method = RequestMethod.POST)
   public String save(@Valid Board board, BindingResult bindingResult) {
+
+    boardService.save(board);
+
     return "redirect:/board/list";
   }
 

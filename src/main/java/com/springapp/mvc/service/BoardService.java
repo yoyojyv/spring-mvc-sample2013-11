@@ -17,4 +17,6 @@ public interface BoardService {
 
   public List<Board> findAll();
 
+  public void save(Board board);
+
 }

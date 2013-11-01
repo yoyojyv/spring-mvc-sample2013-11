@@ -1,8 +1,11 @@
 package com.springapp.mvc.mapper
 
 import com.springapp.mvc.domain.Board
+import org.apache.ibatis.annotations.Insert
+import org.apache.ibatis.annotations.Options
 import org.apache.ibatis.annotations.Param
 import org.apache.ibatis.annotations.Select
+import org.apache.ibatis.annotations.Update
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,5 +21,21 @@ public interface BoardMapper {
 
   @Select("SELECT * FROM Board")
   List<Board> findAll()
+
+  @Insert("""
+    INSERT INTO Board
+      SET
+    subject = #{subject}, contents = #{contents}
+  """)
+  @Options(useGeneratedKeys = true, keyProperty = "id", flushCache = true)
+  void insert(Board board);
+
+  @Update("""
+    UPDATE Board
+      SET
+    subject = #{subject}, contents = #{contents}
+  """)
+  @Options(flushCache = true)
+  void update(Board board);
 
 }

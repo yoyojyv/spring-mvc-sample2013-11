@@ -31,4 +31,23 @@ public class BoardServiceImpl implements BoardService {
   public List<Board> findAll() {
     return boardMapper.findAll();
   }
+
+  @Override
+  public void save(Board board) {
+
+    if (board.getId() != null && board.getId() > 0) {
+      boardMapper.update(board);
+//      Board origin = boardMapper.findById(board.getId());
+//      if (origin != null) {
+//        origin.setSubject(board.getSubject());
+//        origin.setContents(board.getContents());
+//
+//        boardMapper.update(board);
+//      }
+
+    } else {
+      boardMapper.insert(board);
+    }
+
+  }
 }

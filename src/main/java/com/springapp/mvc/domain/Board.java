@@ -36,4 +36,10 @@ public class Board {
   public void setContents(String contents) {
     this.contents = contents;
   }
+
+
+  @Override
+  public String toString() {
+    return "id: " + id + ", subject: " + subject + ", contents : " + contents;
+  }
 }
